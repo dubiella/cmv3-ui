@@ -24,23 +24,6 @@ import dynamic from 'next/dynamic';
 const env_rpcHost = process.env.NEXT_PUBLIC_RPC_HOST;
 const env_network = process.env.NEXT_PUBLIC_NETWORK;
 
-const network = (event) => {
-  switch (event.target.value) {
-    case "Mainnet":
-      setNetwork(WalletAdapterNetwork.Mainnet);
-      break;
-    case "Devnet":
-      setNetwork(WalletAdapterNetwork.Devnet);
-      break;
-    case "Testnet":
-      setNetwork(WalletAdapterNetwork.Testnet);
-      break;
-    default:
-      setNetwork(WalletAdapterNetwork.Devnet);
-      break;
-  }
-};
-
 export default function Home() {
   const [network, setNetwork] = useState(null);
 
