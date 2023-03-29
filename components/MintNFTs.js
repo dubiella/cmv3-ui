@@ -10,6 +10,11 @@ export const MintNFTs = () => {
 
   const [nft, setNft] = useState(null);
 
+  const [cmItemsAvailable, setCmItemsAvailable] = useState(null);
+  const [cmItemsMinted, setCmItemsMinted] = useState(null);
+  const [cmStartDated, setCmStartDated] = useState(null);
+  const [cmSolPayment, setCmSolPayment] = useState(null);
+
   const [disableMint, setDisableMint] = useState(true);
 
   const candyMachineAddress = new PublicKey(
@@ -75,6 +80,9 @@ export const MintNFTs = () => {
       return;
     }
 
+    setCmItemsAvailable(candyMachine.itemsAvailable.toString(10));
+    setCmItemsMinted(candyMachine.itemsMinted.toString(10));
+
     // guard checks have to be done for the relevant guard group! Example is for the default groups defined in Part 1 of the CM guide
     const guard = candyMachine.candyGuard.guards;
 
@@ -84,11 +92,16 @@ export const MintNFTs = () => {
 
     if (guard.startDate != null) {
       const candyStartDate = guard.startDate.date.toString(10);
+
       if (solanaTime < candyStartDate) {
         console.error("startDate: CM not live yet");
         setDisableMint(true);
         return;
       }
+
+      const date = new Date(parseInt(candyStartDate) * 1000);
+      setCmStartDated(date.toDateString());
+
     }
 
     if (guard.endDate != null) {
@@ -119,7 +132,7 @@ export const MintNFTs = () => {
       const mintedAmountBuffer = await metaplex.connection.getAccountInfo(mitLimitCounter, "processed");
       let mintedAmount;
       if (mintedAmountBuffer != null) {
-        mintedAmount = mintedAmountBuffer.data.readUintLE(0, 1);
+        mintedAmount = setMintedAmount(mintedAmountBuffer.data.readUintLE(0, 1));
       }
       if (mintedAmount != null && mintedAmount >= guard.mintLimit.limit) {
         console.error("mintLimit: mintLimit reached!");
@@ -134,6 +147,7 @@ export const MintNFTs = () => {
       );
 
       const costInLamports = guard.solPayment.amount.basisPoints.toString(10);
+      setCmSolPayment(costInLamports);
 
       if (costInLamports > walletBalance) {
         console.error("solPayment: Not enough SOL!");
@@ -284,7 +298,18 @@ export const MintNFTs = () => {
             <button onClick={onClick} disabled={disableMint}>
               mint NFT
             </button>
+
+
           </div>
+
+          <ul>
+            <li>Items Available: { cmItemsAvailable } </li>
+            <li>Items Minted: { cmItemsMinted } </li>
+            <li>Sol Payment Price: { cmSolPayment } </li>
+            <li>Mint Time Start: { cmStartDated } </li>
+          </ul>
+
+
           {nft && (
             <div className={styles.nftPreview}>
               <h1>{nft.name}</h1>
