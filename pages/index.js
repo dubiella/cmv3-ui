@@ -1,4 +1,3 @@
-import styles from "../styles/Home.module.css";
 import { useMemo, useState, useEffect } from "react";
 import Head from 'next/head';
 import {ThemeProvider, createTheme} from '@mui/material/styles';
@@ -17,9 +16,7 @@ import {
 } from "@solana/wallet-adapter-wallets";
 import {
   WalletModalProvider,
-  WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
-import {clusterApiUrl, PublicKey} from "@solana/web3.js";
 import { MetaplexProvider } from "../components/MetaplexProvider";
 import { MintNFTs } from "../components/MintNFTs";
 import "@solana/wallet-adapter-react-ui/styles.css";
