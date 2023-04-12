@@ -1,3 +1,4 @@
+
 {
   "name": "mint-ui-example",
   "version": "0.0.1",
@@ -9,18 +10,22 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@metaplex-foundation/js": "0.17.12",
-    "@solana/wallet-adapter-base": "^0.9.22",
-    "@solana/wallet-adapter-react": "^0.15.32",
-    "@solana/wallet-adapter-react-ui": "^0.9.31",
-    "@solana/wallet-adapter-wallets": "^0.19.16",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@metaplex-foundation/js": "^0.18.3",
+    "@solana/spl-token": "^0.3.7",
+    "@solana/wallet-adapter-base": "^0.9.5",
+    "@solana/wallet-adapter-react": "^0.15.5",
+    "@solana/wallet-adapter-react-ui": "^0.9.7",
+    "@solana/wallet-adapter-wallets": "^0.16.1",
     "@solana/web3.js": "^1.73.2",
+    "@mui/material": "^5.11.14",
     "next": "12.3.1",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "eslint": "8.18.0",
-    "eslint-config-next": "12.2.0"
+    "eslint": "8.16.0",
+    "eslint-config-next": "12.1.6"
   }
 }

@@ -1,11 +1,26 @@
 import styles from "../styles/Home.module.css";
-import { useMetaplex } from "./useMetaplex";
-import { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
+import {useMetaplex} from "./useMetaplex";
+import {useState} from "react";
+import {useWallet} from "@solana/wallet-adapter-react";
+import {PublicKey} from "@solana/web3.js";
+import Image from "next/image";
+import {
+  Container,
+  Grid,
+  Typography,
+  Card,
+  CardActionArea,
+  CardMedia,
+  CardContent,
+  Paper,
+  Stack,
+  Box,
+  Button,
+  LinearProgress, Step
+} from '@mui/material';
 
 export const MintNFTs = () => {
-  const { metaplex } = useMetaplex();
+  const {metaplex} = useMetaplex();
   const wallet = useWallet();
 
   const [nft, setNft] = useState(null);
@@ -15,10 +30,12 @@ export const MintNFTs = () => {
   const [cmStartDated, setCmStartDated] = useState(null);
   const [cmSolPayment, setCmSolPayment] = useState(null);
 
+
   const [disableMint, setDisableMint] = useState(true);
+  const [minting, setMinting] = useState(false);
 
   const candyMachineAddress = new PublicKey(
-    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID
+      process.env.NEXT_PUBLIC_CANDY_MACHINE_ID
   );
   let candyMachine;
   let walletBalance;
@@ -26,12 +43,12 @@ export const MintNFTs = () => {
   const addListener = async () => {
     // add a listener to monitor changes to the candy guard
     metaplex.connection.onAccountChange(candyMachine.candyGuard.address,
-      () => checkEligibility()
+        () => checkEligibility()
     );
 
     // add a listener to monitor changes to the user's wallet
     metaplex.connection.onAccountChange(metaplex.identity().publicKey,
-      () => checkEligibility()
+        () => checkEligibility()
     );
 
     // add a listener to reevaluate if the user is allowed to mint if startDate is reached
@@ -66,14 +83,14 @@ export const MintNFTs = () => {
 
     // read candy machine state from chain
     candyMachine = await metaplex
-      .candyMachines()
-      .findByAddress({ address: candyMachineAddress });
+        .candyMachines()
+        .findByAddress({address: candyMachineAddress});
 
     // enough items available?
     if (
-      candyMachine.itemsMinted.toString(10) -
-      candyMachine.itemsAvailable.toString(10) >
-      0
+        candyMachine.itemsMinted.toString(10) -
+        candyMachine.itemsAvailable.toString(10) >
+        0
     ) {
       console.error("not enough items available");
       setDisableMint(true);
@@ -143,7 +160,7 @@ export const MintNFTs = () => {
 
     if (guard.solPayment != null) {
       walletBalance = await metaplex.connection.getBalance(
-        metaplex.identity().publicKey
+          metaplex.identity().publicKey
       );
 
       const costInLamports = guard.solPayment.amount.basisPoints.toString(10);
@@ -158,7 +175,7 @@ export const MintNFTs = () => {
 
     if (guard.freezeSolPayment != null) {
       walletBalance = await metaplex.connection.getBalance(
-        metaplex.identity().publicKey
+          metaplex.identity().publicKey
       );
 
       const costInLamports = guard.freezeSolPayment.amount.basisPoints.toString(10);
@@ -171,7 +188,7 @@ export const MintNFTs = () => {
     }
 
     if (guard.nftGate != null) {
-      const ownedNfts = await metaplex.nfts().findAllByOwner({ owner: metaplex.identity().publicKey });
+      const ownedNfts = await metaplex.nfts().findAllByOwner({owner: metaplex.identity().publicKey});
       const nftsInCollection = ownedNfts.filter(obj => {
         return (obj.collection?.address.toBase58() === guard.nftGate.requiredCollection.toBase58()) && (obj.collection?.verified === true);
       });
@@ -183,7 +200,7 @@ export const MintNFTs = () => {
     }
 
     if (guard.nftBurn != null) {
-      const ownedNfts = await metaplex.nfts().findAllByOwner({ owner: metaplex.identity().publicKey });
+      const ownedNfts = await metaplex.nfts().findAllByOwner({owner: metaplex.identity().publicKey});
       const nftsInCollection = ownedNfts.filter(obj => {
         return (obj.collection?.address.toBase58() === guard.nftBurn.requiredCollection.toBase58()) && (obj.collection?.verified === true);
       });
@@ -195,7 +212,7 @@ export const MintNFTs = () => {
     }
 
     if (guard.nftPayment != null) {
-      const ownedNfts = await metaplex.nfts().findAllByOwner({ owner: metaplex.identity().publicKey });
+      const ownedNfts = await metaplex.nfts().findAllByOwner({owner: metaplex.identity().publicKey});
       const nftsInCollection = ownedNfts.filter(obj => {
         return (obj.collection?.address.toBase58() === guard.nftPayment.requiredCollection.toBase58()) && (obj.collection?.verified === true);
       });
@@ -215,7 +232,10 @@ export const MintNFTs = () => {
     }
 
     if (guard.tokenBurn != null) {
-      const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: guard.tokenBurn.mint, owner: metaplex.identity().publicKey });
+      const ata = await metaplex.tokens().pdas().associatedTokenAccount({
+        mint: guard.tokenBurn.mint,
+        owner: metaplex.identity().publicKey
+      });
       const balance = await metaplex.connection.getTokenAccountBalance(ata);
       if (balance < guard.tokenBurn.amount.basisPoints.toNumber()) {
         console.error("tokenBurn: Not enough SPL tokens to burn!");
@@ -225,7 +245,10 @@ export const MintNFTs = () => {
     }
 
     if (guard.tokenGate != null) {
-      const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: guard.tokenGate.mint, owner: metaplex.identity().publicKey });
+      const ata = await metaplex.tokens().pdas().associatedTokenAccount({
+        mint: guard.tokenGate.mint,
+        owner: metaplex.identity().publicKey
+      });
       const balance = await metaplex.connection.getTokenAccountBalance(ata);
       if (balance < guard.tokenGate.amount.basisPoints.toNumber()) {
         console.error("tokenGate: Not enough SPL tokens!");
@@ -235,7 +258,10 @@ export const MintNFTs = () => {
     }
 
     if (guard.tokenPayment != null) {
-      const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: guard.tokenPayment.mint, owner: metaplex.identity().publicKey });
+      const ata = await metaplex.tokens().pdas().associatedTokenAccount({
+        mint: guard.tokenPayment.mint,
+        owner: metaplex.identity().publicKey
+      });
       const balance = await metaplex.connection.getTokenAccountBalance(ata);
       if (balance < guard.tokenPayment.amount.basisPoints.toNumber()) {
         console.error("tokenPayment: Not enough SPL tokens to pay!");
@@ -243,7 +269,10 @@ export const MintNFTs = () => {
         return;
       }
       if (guard.freezeTokenPayment != null) {
-        const ata = await metaplex.tokens().pdas().associatedTokenAccount({ mint: guard.freezeTokenPayment.mint, owner: metaplex.identity().publicKey });
+        const ata = await metaplex.tokens().pdas().associatedTokenAccount({
+          mint: guard.freezeTokenPayment.mint,
+          owner: metaplex.identity().publicKey
+        });
         const balance = await metaplex.connection.getTokenAccountBalance(ata);
         if (balance < guard.tokenPayment.amount.basisPoints.toNumber()) {
           console.error("freezeTokenPayment: Not enough SPL tokens to pay!");
@@ -265,62 +294,109 @@ export const MintNFTs = () => {
   // if it's the first time we are processing this function with a connected wallet we read the CM data and add Listeners
   if (candyMachine === undefined) {
     (async () => {
-      // read candy machine data to get the candy guards address
-      await checkEligibility();
-      // Add listeners to refresh CM data to reevaluate if minting is allowed after the candy guard updates or startDate is reached
-      addListener();
-    }
+          // read candy machine data to get the candy guards address
+          await checkEligibility();
+          // Add listeners to refresh CM data to reevaluate if minting is allowed after the candy guard updates or startDate is reached
+          addListener();
+        }
     )();
   }
 
   const onClick = async () => {
-    // Here the actual mint happens. Depending on the guards that you are using you have to run some pre validation beforehand
-    // Read more: https://docs.metaplex.com/programs/candy-machine/minting#minting-with-pre-validation
-    const { nft } = await metaplex.candyMachines().mint({
-      candyMachine,
-      collectionUpdateAuthority: candyMachine.authorityAddress,
-    });
+    setMinting(true);
 
-    setNft(nft);
+
+    try {
+      await metaplex.candyMachines().mint({
+        candyMachine,
+        collectionUpdateAuthority: candyMachine.authorityAddress,
+      });
+      setNft(nft);
+    } catch (e) {
+      console.error(e);
+
+      setMinting(false);
+    }
+
   };
 
   return (
-    <div>
       <div>
-        <div className={styles.container}>
-          <h1 className={styles.title}>NFT Mint Address</h1>
-          <div className={styles.nftForm}>
-            <input
-              type="text"
-              value={nft ? nft.mint.address.toBase58() : ""}
-              readOnly
+
+        <Stack alignItems="center">
+
+          <Stack direction="row" justifyContent="center" sx={{pb:4}}>
+            <Typography variant="h6" sx={{p:1}}>
+              Price:
+            </Typography>
+            <Image
+                src="/sol.svg"
+                width="30"
+                height="30"
+                alt="sol"
             />
-            <button onClick={onClick} disabled={disableMint}>
-              mint NFT
-            </button>
+            <Typography variant="h6" sx={{p:1}}>
+              { cmSolPayment }
+            </Typography>
 
+          </Stack>
 
-          </div>
-
-          <ul>
-            <li>Items Available: { cmItemsAvailable } </li>
-            <li>Items Minted: { cmItemsMinted } </li>
-            <li>Sol Payment Price: { cmSolPayment } </li>
-            <li>Mint Time Start: { cmStartDated } </li>
-          </ul>
-
-
-          {nft && (
-            <div className={styles.nftPreview}>
-              <h1>{nft.name}</h1>
-              <img
-                src={nft?.json?.image || "/fallbackImage.jpg"}
-                alt="The downloaded illustration of the provided NFT address."
-              />
-            </div>
+          {!minting ? (
+              <Button
+                  size="large" variant="outlined" sx={{p: 3}}
+                  onClick={onClick}>
+                mint NFT
+              </Button>
+          ) : (
+              <Button
+                  size="large" variant="outlined" sx={{p: 3}}
+                  disabled>
+                mint NFT
+              </Button>
           )}
-        </div>
+
+
+          <Box sx={{width: 300}}>
+            <Typography variant="h6" color="text.secondary"
+                        sx={{wordWrap: "break-word", p: 1}}>{cmItemsMinted} / 1000</Typography>
+            {minting ? (
+                <LinearProgress/>
+            ) : (
+                <LinearProgress variant="determinate" value={(cmItemsMinted / 10)}/>
+            )}
+          </Box>
+
+
+        </Stack>
+
+
+        {/*<ul>*/}
+        {/*  <li>Items Available: { cmItemsAvailable } </li>*/}
+        {/*  <li>Items Minted: { cmItemsMinted } </li>*/}
+        {/*  <li>Sol Payment Price: { cmSolPayment } </li>*/}
+        {/*  <li>Mint Time Start: { cmStartDated } </li>*/}
+        {/*</ul>*/}
+
+        <Box sx={{py: 6}}>
+          {nft && (
+              <Paper square variant="outlined" sx={{width: 300, height: 400}}>
+
+                <Image
+                    src={nft?.json?.image || "/fallbackImage.jpg"}
+                    width="300"
+                    height="300"
+                    alt="The downloaded illustration of the provided NFT address."
+                />
+
+                <Typography variant="h6" color="text.secondary" sx={{
+                  wordWrap: "break-word",
+                  p: 2
+                }}>{nft?.name || "ArtMonkees Item #000"}</Typography>
+              </Paper>
+          )}
+        </Box>
+
+
       </div>
-    </div>
   );
 };

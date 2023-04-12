@@ -1,5 +1,8 @@
 import styles from "../styles/Home.module.css";
 import { useMemo, useState, useEffect } from "react";
+import Head from 'next/head';
+import {ThemeProvider, createTheme} from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import {
   ConnectionProvider,
   WalletProvider,
@@ -23,6 +26,13 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import dynamic from 'next/dynamic';
 const env_rpcHost = process.env.NEXT_PUBLIC_RPC_HOST;
 const env_network = process.env.NEXT_PUBLIC_NETWORK;
+import {Box, Container, Grid, Stack, Typography} from '@mui/material';
+import Image from "next/image";
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
 export default function Home() {
   const [network, setNetwork] = useState(null);
@@ -46,35 +56,51 @@ export default function Home() {
 
 
   const wallets = useMemo(
-    () => [
-      new PhantomWalletAdapter(),
-      new GlowWalletAdapter(),
-      new SlopeWalletAdapter(),
-      new SolflareWalletAdapter({ network }),
-      new TorusWalletAdapter(),
-    ],
-    [network]
+      () => [
+        new PhantomWalletAdapter(),
+        new GlowWalletAdapter(),
+        new SlopeWalletAdapter(),
+        new SolflareWalletAdapter({ network }),
+        new TorusWalletAdapter(),
+      ],
+      [network]
   );
 
   const ButtonWrapper = dynamic(() =>
-    import('@solana/wallet-adapter-react-ui').then((mod) => mod.WalletMultiButton)
+      import('@solana/wallet-adapter-react-ui').then((mod) => mod.WalletMultiButton)
   );
 
 
   return (
-    <div>
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect>
-          <WalletModalProvider>
-            <MetaplexProvider>
-              <div className={styles.App}>
-                <ButtonWrapper />
-                <MintNFTs />
-              </div>
-            </MetaplexProvider>
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
-    </div>
+      <div>
+        <Head>
+          <title>ArtMonkees Mint</title>
+        </Head>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <ConnectionProvider endpoint={endpoint}>
+            <WalletProvider wallets={wallets} autoConnect>
+              <WalletModalProvider>
+                <MetaplexProvider>
+                  <Container maxWidth="xs" >
+                    <Stack alignItems="center" sx={{pt:4}}>
+                      <ButtonWrapper />
+                      <Box sx={{p:4}}>
+                        <Image
+                            src="/img.svg"
+                            width="300"
+                            height="300"
+                            alt=""
+                        />
+                      </Box>
+                      <MintNFTs />
+                    </Stack>
+                  </Container>
+                </MetaplexProvider>
+              </WalletModalProvider>
+            </WalletProvider>
+          </ConnectionProvider>
+        </ThemeProvider>
+      </div>
   );
 }
